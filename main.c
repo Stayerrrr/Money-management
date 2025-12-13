@@ -22,7 +22,8 @@ const char *namaFile_history_transfer = "history_transfer.txt";
 #define MAX_LINE_LENGTH 200
 char line[MAX_LINE_LENGTH];
 
-// Array menulis di file
+// Array menulis di file tabungan
+double saldo_tabungan;
 
 // Deklarasi fungsi
 int menu();
@@ -272,6 +273,32 @@ int main() {
             printf("Username salah!\n");
         }
         getchar(); // Clear buffer
+    }
+
+    tabungan = fopen(namaFile_tabungan, "a+"); // append dan read
+    if (tabungan == NULL) {
+        printf("Gagal membuka file tabungan.\n");
+        return 1;
+    }
+
+    while (fgets(line, sizeof(line), tabungan)) break;
+    sscanf(line, "Saldo: Rp. %lf", &saldo_tabungan);
+
+    if (feof(tabungan)) {
+        saldo_tabungan = 0.0;
+        printf("Msukkan saldo awal tabungan Anda: ");
+        scanf("%lf", &saldo_tabungan);
+        printf("Saldo tabungan Anda: Rp. %.2lf\n", saldo_tabungan);
+        fprintf(tabungan, "Saldo: Rp. %.2lf\n", saldo_tabungan);
+    
+        fclose(tabungan); 
+    } else {
+        printf("Saldo tabungan Anda: Rp. %.2lf\n", saldo_tabungan);
+        fclose(tabungan); 
+        printf("Tekan Enter untuk melanjutkan...");
+        char a[4];
+        scanf("%c", &a); // wait for Enter key
+        getchar();
     }
 
     menu();
