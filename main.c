@@ -26,11 +26,11 @@ double saldo_tabungan;
 
 // Array menulis di file history transfer
 double kirimTf;
-long noRekeningTf;
+int noRekeningTf;
 char tanggalTf[10];
 
 // Deklarasi fungsi
-int menu();
+void menu();
 void lihatTabungan();
 void transfer();
 void peminjaman();
@@ -69,6 +69,7 @@ void lihatTabungan() {
         char a[4];
         scanf("%c", &a); // wait for Enter key
         getchar();
+        lihatTabungan();
     } else if (pilihan == 2) {
         printf("\nIni tabungan deposit\n");
         printf("Ingin kembali ke menu? (y/n): ");
@@ -98,10 +99,10 @@ void transfer() {
 
     history_transfer = fopen(namaFile_history_transfer, "a+");
 
-    printf("=== Transfer ===");
+    printf("=== Transfer ===\n");
     while (1)
     {
-        printf("\nMasukkan jumlah transfer minimal 20.000 : ");
+        printf("Masukkan jumlah transfer minimal 20.000 : ");
         scanf("%lf", &kirimTf);
         
         if (kirimTf < MIN_TRANSFER) {
@@ -109,37 +110,56 @@ void transfer() {
         } else {
             break;
         }
-        
     }
-
+    
     while (1)
     {
         printf("Masukkan tanggal transfer (DD/MM/YYYY)  : ");
-        scanf("%9s", tanggalTf);
+        scanf("%10s", tanggalTf);
+        getchar();
         break;
     }
     
     while (1)
     {
         printf("Masukkan nomor rekening (max 6 digit)   : ");
-        scanf("%ld", &noRekeningTf);
-    
+        scanf("%d", &noRekeningTf);
+        
         if (noRekeningTf < MIN_NOREKENING || noRekeningTf > MAX_NOREKENING) {
             printf("Nomor rekening harus 1-6 digit!\n");
         } else {
-            printf("\nTransfer sebesar %.2lf tanggal %s ke rekening %ld berhasil!\n",
-                    kirimTf, tanggalTf, noRekeningTf);
-            break;
+            fprintf(history_transfer ,"%s | %.2lf | %d\n", tanggalTf, kirimTf, noRekeningTf);
+            printf("\nTransfer sebesar %.2lf tanggal %s ke rekening %d berhasil!\n",
+                kirimTf, tanggalTf, noRekeningTf);
+                break;
+            }
         }
-    }
-
-    fclose(history_transfer);
-    printf("Apakah Anda ingin melakukan transfer lagi? (y/n): ");
-    char lagi;
-    scanf(" %c", &lagi);
-    if (lagi == 'y' || lagi == 'Y') {
-        transfer();
-        return;
+        fclose(history_transfer);
+        printf("Apakah Anda ingin melakukan transfer lagi? (y/n): ");
+        char lagi;
+        scanf(" %c", &lagi);
+        if (lagi == 'y' || lagi == 'Y') {
+            transfer();
+            return;
+        } else {
+            history_transfer = fopen(namaFile_history_transfer, "r");
+            if (history_transfer == NULL) {
+                printf("History transfer belum tersedia.\n");
+                return;
+            }
+            
+            printf("\n=== History Transfer ===\n");
+            
+            while (fgets(line, sizeof(line), history_transfer)) {
+                printf("%s", line);
+            }
+            
+            fclose(history_transfer);
+            printf("------------------------------------");
+            printf("\nTekan Enter untuk melanjutkan...");
+            char a[4];
+            scanf("%c", &a); // wait for Enter key
+            getchar();
     }
     menu();
 }
@@ -230,7 +250,7 @@ void bayar_tagihan() {
 }
 
 // ========================= MENU UTAMA =========================
-int menu() {
+void menu() {
     int pilihanm;
 
     do {
@@ -257,11 +277,9 @@ int menu() {
         case 3: peminjaman(); break;
         case 4: bayar_tagihan(); break;
         case 5: printf("\nTerima kasih telah menggunakan aplikasi ini!\n"); break;
-        default:
-        printf("Pilihan salah, coba lagi!\n");
+        default: printf("Pilihan salah, coba lagi!\n"); break;
         }
     } while (pilihanm != 5);
-    return pilihanm;
 }
 
 // ========================= MAIN =========================
@@ -304,11 +322,6 @@ int main() {
     if (saldo == NULL) {
         printf("Gagal membuka file tabungan.\n");
         return 1;
-    }
-
-    saldo = fopen(namaFile_saldo, "r+");
-    if (saldo == NULL) {
-        saldo = fopen(namaFile_saldo, "w+");
     }
 
     if (fgets(line, sizeof(line), saldo) == NULL) {
