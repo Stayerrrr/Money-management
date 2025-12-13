@@ -295,7 +295,8 @@ int main() {
     } else {
         printf("Saldo tabungan Anda: Rp. %.2lf\n", saldo_tabungan);
         fclose(tabungan); 
-        printf("Tekan Enter untuk melanjutkan...");
+        printf("--------------------------------");
+        printf("\nTekan Enter untuk melanjutkan...");
         char a[4];
         scanf("%c", &a); // wait for Enter key
         getchar();
