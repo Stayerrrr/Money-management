@@ -5,7 +5,6 @@
 // Variabel global
 char username[25];
 double inputPassword;
-double noRekening;
 
 // Konstanta untuk batasan nomor rekening dan transfer
 #define MAX_NOREKENING 999999
@@ -13,8 +12,8 @@ double noRekening;
 #define MIN_TRANSFER 20000
 
 // File untuk menyimpan data
-FILE *tabungan;
-const char *namaFile_tabungan = "tabungan.txt";
+FILE *saldo;
+const char *namaFile_tabungan = "saldo.txt";
 FILE *history_transfer;
 const char *namaFile_history_transfer = "history_transfer.txt";
 
@@ -24,6 +23,11 @@ char line[MAX_LINE_LENGTH];
 
 // Array menulis di file tabungan
 double saldo_tabungan;
+
+// Array menulis di file history transfer
+double kirimTf;
+long noRekeningTf;
+char tanggalTf[10];
 
 // Deklarasi fungsi
 int menu();
@@ -49,21 +53,22 @@ void lihatTabungan() {
     scanf("%d", &pilihan);
 
     if (pilihan == 1) {
-        tabungan = fopen(namaFile_tabungan, "a+");
-        if (tabungan == NULL) {
+        saldo = fopen(namaFile_tabungan, "r");
+        if (saldo == NULL) {
             printf("Gagal membuka file tabungan.\n");
-            return 1;
         }
-        printf("");
-        
-        fclose(tabungan);
+        while (fgets(line, sizeof(line), saldo)) break;
+        sscanf(line, "Saldo: Rp. %lf", &saldo_tabungan);
 
-        printf("Ingin kembali ke menu? (y/n): ");
-        char kembali;
-        scanf(" %c", &kembali);
-        if (kembali == 'y' || kembali == 'Y') {
-            lihatTabungan();
-        } 
+        printf("================================\n");
+        printf("Saldo: Rp. %.2lf", saldo_tabungan);
+        printf("\n================================");
+        
+        fclose(saldo);
+        printf("\nTekan Enter untuk melanjutkan...");
+        char a[4];
+        scanf("%c", &a); // wait for Enter key
+        getchar();
     } else if (pilihan == 2) {
         printf("\nIni tabungan deposit\n");
         printf("Ingin kembali ke menu? (y/n): ");
@@ -91,31 +96,44 @@ void transfer() {
         system("clear"); // perintah clear di Linux/Unix
     }
 
-    double kirim;
+    history_transfer = fopen(namaFile_history_transfer, "a+");
+
     printf("=== Transfer ===");
-    printf("\nMasukkan jumlah transfer minimal 20.000 : ");
-    scanf("%lf", &kirim);
-    
-    if (kirim < MIN_TRANSFER) {
-        printf("\nMinimal transfer adalah 20.000\n");
-        transfer();
-        return;
+    while (1)
+    {
+        printf("\nMasukkan jumlah transfer minimal 20.000 : ");
+        scanf("%lf", &kirimTf);
+        
+        if (kirimTf < MIN_TRANSFER) {
+            printf("\nMinimal transfer adalah 20.000\n");
+        } else {
+            break;
+        }
+        
+    }
+
+    while (1)
+    {
+        printf("Masukkan tanggal transfer (DD/MM/YYYY)  : ");
+        scanf("%9s", tanggalTf);
+        break;
     }
     
     while (1)
     {
         printf("Masukkan nomor rekening (max 6 digit)   : ");
-        scanf("%lf", &noRekening);
+        scanf("%ld", &noRekeningTf);
     
-        if (noRekening < MIN_NOREKENING || noRekening > MAX_NOREKENING) {
+        if (noRekeningTf < MIN_NOREKENING || noRekeningTf > MAX_NOREKENING) {
             printf("Nomor rekening harus 1-6 digit!\n");
         } else {
-            printf("\nTransfer sebesar %.2lf ke rekening %.0lf berhasil!\n", kirim, noRekening);
-            printf("================================\n");
+            printf("\nTransfer sebesar %.2lf tanggal %s ke rekening %ld berhasil!\n",
+                    kirimTf, tanggalTf, noRekeningTf);
             break;
         }
     }
 
+    fclose(history_transfer);
     printf("Apakah Anda ingin melakukan transfer lagi? (y/n): ");
     char lagi;
     scanf(" %c", &lagi);
@@ -213,7 +231,7 @@ void bayar_tagihan() {
 
 // ========================= MENU UTAMA =========================
 int menu() {
-    int pilihan;
+    int pilihanm;
 
     do {
         char system_operasi[10] = "nt";  // contoh nilai
@@ -231,9 +249,9 @@ int menu() {
         printf("4. Bayar Tagihan\n");
         printf("5. Keluar\n");
         printf("Masukkan pilihan: ");
-        scanf("%d", &pilihan);
+        scanf("%d", &pilihanm);
 
-        switch (pilihan) {
+        switch (pilihanm) {
         case 1: lihatTabungan(); break;
         case 2: transfer(); break;
         case 3: peminjaman(); break;
@@ -242,8 +260,8 @@ int menu() {
         default:
         printf("Pilihan salah, coba lagi!\n");
         }
-    } while (pilihan != 5);
-    return pilihan;
+    } while (pilihanm != 5);
+    return pilihanm;
 }
 
 // ========================= MAIN =========================
@@ -282,37 +300,40 @@ int main() {
         getchar(); // Clear buffer
     }
 
-    tabungan = fopen(namaFile_tabungan, "a+"); // append dan read
-    if (tabungan == NULL) {
+    saldo = fopen(namaFile_tabungan, "a+"); // append dan read
+    if (saldo == NULL) {
         printf("Gagal membuka file tabungan.\n");
         return 1;
     }
 
-    while (fgets(line, sizeof(line), tabungan)) break;
-    sscanf(line, "Saldo: Rp. %lf", &saldo_tabungan);
+    saldo = fopen(namaFile_tabungan, "r+");
+    if (saldo == NULL) {
+        saldo = fopen(namaFile_tabungan, "w+");
+    }
 
-    if (feof(tabungan)) {
-        saldo_tabungan = 0.0;
-        printf("Msukkan saldo awal tabungan Anda: ");
+    if (fgets(line, sizeof(line), saldo) == NULL) {
+        printf("Masukkan saldo awal tabungan Anda: ");
         scanf("%lf", &saldo_tabungan);
-        printf("Saldo tabungan Anda: Rp. %.2lf\n", saldo_tabungan);
-        fprintf(tabungan, "Saldo: Rp. %.2lf\n", saldo_tabungan);
-        printf("Saldo tabungan Anda: Rp. %.2lf\n", saldo_tabungan);
-        fclose(tabungan); 
-        printf("--------------------------------");
+        fprintf(saldo, "Saldo: Rp. %.2lf\n", saldo_tabungan);
+        fclose(saldo);
+        printf("Saldo anda sekarang adalah: Rp. %.2lf", saldo_tabungan);
+        printf("\n--------------------------------------");
         printf("\nTekan Enter untuk melanjutkan...");
         char a[4];
         scanf("%c", &a); // wait for Enter key
         getchar();
     } else {
-        printf("Saldo tabungan Anda: Rp. %.2lf\n", saldo_tabungan);
-        fclose(tabungan); 
-        printf("--------------------------------");
+        sscanf(line, "Saldo: Rp. %lf", &saldo_tabungan);
+        fclose(saldo);
+        printf("Saldo anda sekarang adalah: Rp. %.2lf", saldo_tabungan);
+        printf("\n--------------------------------------");
         printf("\nTekan Enter untuk melanjutkan...");
         char a[4];
         scanf("%c", &a); // wait for Enter key
         getchar();
     }
+
+
 
     menu();
     return 0;
