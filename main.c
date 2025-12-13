@@ -13,7 +13,7 @@ double inputPassword;
 
 // File untuk menyimpan data
 FILE *saldo;
-const char *namaFile_tabungan = "saldo.txt";
+const char *namaFile_saldo = "saldo.txt";
 FILE *history_transfer;
 const char *namaFile_history_transfer = "history_transfer.txt";
 
@@ -53,7 +53,7 @@ void lihatTabungan() {
     scanf("%d", &pilihan);
 
     if (pilihan == 1) {
-        saldo = fopen(namaFile_tabungan, "r");
+        saldo = fopen(namaFile_saldo, "r");
         if (saldo == NULL) {
             printf("Gagal membuka file tabungan.\n");
         }
@@ -300,15 +300,15 @@ int main() {
         getchar(); // Clear buffer
     }
 
-    saldo = fopen(namaFile_tabungan, "a+"); // append dan read
+    saldo = fopen(namaFile_saldo, "a+"); // append dan read
     if (saldo == NULL) {
         printf("Gagal membuka file tabungan.\n");
         return 1;
     }
 
-    saldo = fopen(namaFile_tabungan, "r+");
+    saldo = fopen(namaFile_saldo, "r+");
     if (saldo == NULL) {
-        saldo = fopen(namaFile_tabungan, "w+");
+        saldo = fopen(namaFile_saldo, "w+");
     }
 
     if (fgets(line, sizeof(line), saldo) == NULL) {
