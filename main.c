@@ -56,10 +56,6 @@ void lihatTabungan() {
         saldo = fopen(namaFile_saldo, "r");
         if (saldo == NULL) {
             printf("Gagal membuka file tabungan.\n");
-<<<<<<< HEAD
-=======
-            return 0;
->>>>>>> d931a94b8e1796389b05a56ca3de4c4b0ff563af
         }
         while (fgets(line, sizeof(line), saldo)) break;
         sscanf(line, "Saldo: Rp. %lf", &saldo_tabungan);
