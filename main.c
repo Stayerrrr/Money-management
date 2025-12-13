@@ -52,7 +52,7 @@ void lihatTabungan() {
         tabungan = fopen(namaFile_tabungan, "a+");
         if (tabungan == NULL) {
             printf("Gagal membuka file tabungan.\n");
-            return 1;
+            return 0;
         }
         printf("");
         
