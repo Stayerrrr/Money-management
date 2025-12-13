@@ -50,8 +50,11 @@ void lihatTabungan() {
 
     if (pilihan == 1) {
         tabungan = fopen(namaFile_tabungan, "a+");
-        
-        printf("I");
+        if (tabungan == NULL) {
+            printf("Gagal membuka file tabungan.\n");
+            return 1;
+        }
+        printf("");
         
         fclose(tabungan);
 
