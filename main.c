@@ -49,8 +49,12 @@ void lihatTabungan() {
     scanf("%d", &pilihan);
 
     if (pilihan == 1) {
-        printf("\nIni tabungan anda\n");
+        tabungan = fopen(namaFile_tabungan, "a+");
         
+        printf("I");
+        
+        fclose(tabungan);
+
         printf("Ingin kembali ke menu? (y/n): ");
         char kembali;
         scanf(" %c", &kembali);
@@ -290,8 +294,13 @@ int main() {
         scanf("%lf", &saldo_tabungan);
         printf("Saldo tabungan Anda: Rp. %.2lf\n", saldo_tabungan);
         fprintf(tabungan, "Saldo: Rp. %.2lf\n", saldo_tabungan);
-    
+        printf("Saldo tabungan Anda: Rp. %.2lf\n", saldo_tabungan);
         fclose(tabungan); 
+        printf("--------------------------------");
+        printf("\nTekan Enter untuk melanjutkan...");
+        char a[4];
+        scanf("%c", &a); // wait for Enter key
+        getchar();
     } else {
         printf("Saldo tabungan Anda: Rp. %.2lf\n", saldo_tabungan);
         fclose(tabungan); 
