@@ -41,7 +41,7 @@ void lihatTabungan();
 void transfer();
 void peminjaman();
 void bayar_tagihan();
-
+// done
 // ================= LIHAT TABUNGAN DAN DEPOSIT =================
 void deposit() {
     // Fixed: membaca file saldo - open and read correctly
@@ -92,7 +92,7 @@ void deposit() {
         {
             printf("Masukkan jumlah uang yang ingin ditambahkan ke deposit: ");
             scanf("%lf", &tambahDeposit);
-            
+
             if (tambahDeposit <= 0) {
                 printf("Jumlah harus lebih dari 0!\n");
                 continue;
