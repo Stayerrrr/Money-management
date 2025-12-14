@@ -2,7 +2,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-// Variabel global
+// ================ Variabel global ================
+
+// Variabel login
 char username[25];
 double inputPassword;
 
@@ -16,12 +18,13 @@ FILE *saldo;
 const char *namaFile_saldo = "saldo.txt";
 FILE *history_transfer;
 const char *namaFile_history_transfer = "history_transfer.txt";
+FILE *salDeposit;
 
 // Buffer untuk membaca baris dari file
 #define MAX_LINE_LENGTH 200
 char line[MAX_LINE_LENGTH];
 
-// Array menulis di file tabungan
+// Array menulis di file saldo
 double saldo_tabungan;
 
 // Array menulis di file history transfer
@@ -36,7 +39,19 @@ void transfer();
 void peminjaman();
 void bayar_tagihan();
 
-// ========================= LIHAT TABUNGAN =========================
+// ========================= LIHAT TABUNGAN DAN DEPOSIT =========================
+void deposit() {
+    char system_operasi[10] = "nt";  // contoh nilai
+    
+    if (strcmp(system_operasi, "nt") == 0) {
+        system("cls");   // perintah clear di Windows
+    } else {
+        system("clear"); // perintah clear di Linux/Unix
+    }
+    printf("=== DEPOSIT ===\n");
+    printf("Saldo Deposit: ");
+}
+
 void lihatTabungan() {
     char system_operasi[10] = "nt";  // contoh nilai
 
@@ -60,18 +75,22 @@ void lihatTabungan() {
         while (fgets(line, sizeof(line), saldo)) break;
         sscanf(line, "Saldo: Rp. %lf", &saldo_tabungan);
 
-        printf("================================\n");
+        printf("\n================================\n");
         printf("Saldo: Rp. %.2lf", saldo_tabungan);
         printf("\n================================");
         
         fclose(saldo);
+
         printf("\nTekan Enter untuk melanjutkan...");
         char a[4];
         scanf("%c", &a); // wait for Enter key
         getchar();
+
         lihatTabungan();
+
     } else if (pilihan == 2) {
         printf("\nIni tabungan deposit\n");
+
         printf("Ingin kembali ke menu? (y/n): ");
         char kembali;
         scanf(" %c", &kembali);
@@ -120,6 +139,10 @@ void transfer() {
         break;
     }
     
+    // membaca file saldo
+    while (fgets(line, sizeof(line), saldo)) break;
+    sscanf(line, "Saldo: Rp. %lf", &saldo_tabungan);
+
     while (1)
     {
         printf("Masukkan nomor rekening (max 6 digit)   : ");
@@ -128,13 +151,49 @@ void transfer() {
         if (noRekeningTf < MIN_NOREKENING || noRekeningTf > MAX_NOREKENING) {
             printf("Nomor rekening harus 1-6 digit!\n");
         } else {
-            fprintf(history_transfer ,"%s | %.2lf | %d\n", tanggalTf, kirimTf, noRekeningTf);
-            printf("\nTransfer sebesar %.2lf tanggal %s ke rekening %d berhasil!\n",
-                kirimTf, tanggalTf, noRekeningTf);
-                break;
+            if (saldo_tabungan < kirimTf) {
+                printf("\nSaldo tidak cukup! Mau tf lagi (y/n)? ");
+                char lagi;
+                scanf(" %c", &lagi);
+                if (lagi == 'y' || lagi == 'Y') {
+                    transfer();
+                } else {
+                    menu();
+                }
+            } else {
+                fprintf(history_transfer ,"%s | %.2lf | %d\n", tanggalTf, kirimTf, noRekeningTf);
+                printf("\nTransfer sebesar %.2lf tanggal %s ke rekening %d berhasil!\n",
+                    kirimTf, tanggalTf, noRekeningTf);
+                    break;
             }
         }
-        fclose(history_transfer);
+    }
+    fclose(history_transfer);
+
+        // untuk menghitung saldo sesudah mentransfer
+        saldo = fopen(namaFile_saldo , "r");
+        FILE *temp = fopen("temp.txt", "w");
+        if (saldo == NULL || temp == NULL) { // mengecek apakah file berhasil dibuat
+            printf("Gagal membuka file!\n");
+            return;
+        }
+
+        if (saldo_tabungan < kirimTf) { // kondisi jika saldo kurang dari transfer
+            printf("Saldo tidak mencukupi!\n");
+            fclose(saldo);
+            fclose(temp);
+            remove("temp.txt");
+            return;
+        }
+
+        saldo_tabungan -= kirimTf;
+        fprintf(temp, "Saldo: Rp. %.2lf\n",saldo_tabungan);
+
+        fclose(saldo);
+        fclose(temp);
+        remove(namaFile_saldo);
+        rename("temp.txt", namaFile_saldo);
+
         printf("Apakah Anda ingin melakukan transfer lagi? (y/n): ");
         char lagi;
         scanf(" %c", &lagi);
