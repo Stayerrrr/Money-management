@@ -19,6 +19,7 @@ const char *namaFile_saldo = "saldo.txt";
 FILE *history_transfer;
 const char *namaFile_history_transfer = "history_transfer.txt";
 FILE *salDeposit;
+const char *namaFile_deposit = "deposit.txt";
 
 // Buffer untuk membaca baris dari file
 #define MAX_LINE_LENGTH 200
@@ -26,6 +27,8 @@ char line[MAX_LINE_LENGTH];
 
 // Array menulis di file saldo
 double saldo_tabungan;
+// array deposit
+double depoSaldo;
 
 // Array menulis di file history transfer
 double kirimTf;
@@ -41,20 +44,98 @@ void bayar_tagihan();
 
 // ================= LIHAT TABUNGAN DAN DEPOSIT =================
 void deposit() {
-    char system_operasi[10] = "nt";  // contoh nilai
-    
-    if (strcmp(system_operasi, "nt") == 0) {
-        system("cls");   // perintah clear di Windows
-    } else {
-        system("clear"); // perintah clear di Linux/Unix
+    // Fixed: membaca file saldo - open and read correctly
+    saldo = fopen(namaFile_saldo, "r");
+    if (saldo == NULL) {
+        printf("Gagal membuka file saldo!\n");
+        return;
     }
-    printf("=== DEPOSIT ===\n");
-    printf("Saldo Deposit: ");
-    printf("Ingin kembali ke menu? (y/n): ");
+
+    if (fgets(line, sizeof(line), saldo) != NULL) {
+        sscanf(line, "Saldo: Rp. %lf", &saldo_tabungan);
+    }
+    fclose(saldo);
+
+    // Fixed: membaca file deposit - open and read correctly
+    salDeposit = fopen(namaFile_deposit, "r");
+    if (salDeposit == NULL) {
+        // If deposit file doesn't exist, prompt to enter initial deposit
+        printf("\nMasukkan uang deposit awal: ");
+        scanf("%lf", &depoSaldo);
+        // Create and write to file
+        salDeposit = fopen(namaFile_deposit, "w");
+        if (salDeposit != NULL) {
+            fprintf(salDeposit, "Saldo Deposit: Rp. %.2lf\n", depoSaldo);
+            fclose(salDeposit);
+        }
+    } else {
+        if (fgets(line, sizeof(line), salDeposit) != NULL) {
+            sscanf(line, "Saldo Deposit: Rp. %lf", &depoSaldo);
+        }
+        fclose(salDeposit);
+    }
+
+    printf("\n=== DEPOSIT ===\n");
+    printf("Saldo anda saat ini: Rp. %.2lf\n", saldo_tabungan);
+    printf("Saldo Deposit: Rp. %.2lf\n", depoSaldo);
+
+    printf("\nIngin menambah uang deposit? (y/n): ");
     char kembali;
     scanf(" %c", &kembali);
-    // Fixed: Removed recursive call to lihatTabungan() to prevent nested menus. Now returns to menu.
-    return;
+    if (kembali == 'n' || kembali == 'N') {
+        // Fixed: Removed recursive call to deposit() to prevent stack overflow. Now returns to menu.
+        return;
+    } else {
+        double tambahDeposit;
+        printf("----------------------------------------\n");
+        while (1)
+        {
+            printf("Masukkan jumlah uang yang ingin ditambahkan ke deposit: ");
+            scanf("%lf", &tambahDeposit);
+            
+            if (tambahDeposit <= 0) {
+                printf("Jumlah harus lebih dari 0!\n");
+                continue;
+            }
+            if (saldo_tabungan < tambahDeposit) {
+                printf("Saldo tabungan tidak cukup untuk menambah deposit!\n");
+                continue;
+            }
+            break;
+        }
+        
+        depoSaldo += tambahDeposit;
+        // Update file deposit
+        FILE *temp = fopen("temp_deposit.txt", "w");
+        if (temp == NULL) {
+            printf("Gagal membuka file!\n");
+            return;
+        }
+        fprintf(temp, "Saldo Deposit: Rp. %.2lf\n", depoSaldo);
+        fclose(temp);
+        remove(namaFile_deposit);
+        rename("temp_deposit.txt", namaFile_deposit);
+
+        // Update saldo file
+        FILE *tempp = fopen("temp_saldo.txt", "w");
+        if (tempp == NULL) {
+            printf("Gagal membuka file!\n");
+            return;
+        }
+        saldo_tabungan -= tambahDeposit;
+        fprintf(tempp, "Saldo: Rp. %.2lf\n", saldo_tabungan);
+        fclose(tempp);
+        remove(namaFile_saldo);
+        rename("temp_saldo.txt", namaFile_saldo);
+
+        printf("----------------------------------------\n");
+        printf("Deposit berhasil ditambahkan sebesar Rp. %.2lf\n", tambahDeposit);
+        printf("Saldo Deposit sekarang: Rp. %.2lf\n", depoSaldo);
+        printf("----------------------------------------\n");
+        printf("Tekan enter untuk lanjut...");
+        getchar();
+        getchar();
+    }
 }
 void tabungan() {
     saldo = fopen(namaFile_saldo, "r");
@@ -109,7 +190,7 @@ void lihatTabungan() {
     }
     return;
 }
-
+// done
 // ========================= TRANSFER =========================
 void transfer() {
     char system_operasi[10] = "nt";  // contoh nilai
