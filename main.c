@@ -117,10 +117,10 @@ void transfer() {
     sscanf(line, "Saldo: Rp. %lf", &saldo_tabungan);
     fclose(saldo);
 
-    printf("Jumlah transfer: ");
+    printf("Jumlah transfer (Minimal 20k): ");
     scanf("%lf", &kirimTf);
     if (kirimTf < MIN_TRANSFER || kirimTf > saldo_tabungan) {
-        printf("Jumlah tidak valid!\n");
+        printf("Jumlah tidak valid! (Minimal 20k)\n");
         return;
     }
 
