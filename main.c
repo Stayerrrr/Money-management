@@ -214,8 +214,9 @@ void peminjaman() {
         printf("\n=== MENU PINJAMAN ===\n");
         printf("1. KPR (3jt - 128jt)\n");
         printf("2. Multiguna (5jt - 500jt)\n");
-        printf("3. Lihat History\n");
-        printf("4. Kembali\n");
+        printf("3. Bayar Pinjaman\n");
+        printf("4. Lihat History\n");
+        printf("5. Kembali\n");
         printf("Pilih: ");
 
         if (scanf("%d", &pilihan) != 1) {
@@ -224,11 +225,11 @@ void peminjaman() {
             continue;
         }
 
-        if (pilihan == 4) {
+        if (pilihan == 5) {
             return;
         }
 
-        if (pilihan == 3) {
+        if (pilihan == 4) {
             history_pinjaman = fopen(namaFile_pinjam, "r");
             if (history_pinjaman == NULL) {
                 printf("\nBelum ada history pinjaman.\n");
