@@ -212,7 +212,8 @@ void peminjaman() {
         printf("\n=== MENU PINJAMAN ===\n");
         printf("1. KPR (3jt - 128jt)\n");
         printf("2. Multiguna (5jt - 500jt)\n");
-        printf("3. Kembali\n");
+        printf("3. Lihat History\n");
+        printf("4. Kembali\n");
         printf("Pilih: ");
 
         if (scanf("%d", &pilihan) != 1) {
@@ -221,25 +222,41 @@ void peminjaman() {
             continue;
         }
 
-        if (pilihan == 3) {
+        if (pilihan == 4) {
             return;
         }
 
-        if (pilihan != 1 && pilihan != 2) {
+        if (pilihan == 3) {
+            history_pinjaman = fopen(namaFile_pinjam, "r");
+            if (history_pinjaman == NULL) {
+                printf("\nBelum ada history pinjaman.\n");
+            } else {
+                printf("\n=== HISTORY PINJAMAN ===\n");
+                while (fgets(line, sizeof(line), history_pinjaman)) {
+                    printf("%s", line);
+                }
+                fclose(history_pinjaman);
+            }
+            printf("\nTekan Enter...");
+            getchar(); getchar();
+            continue;
+        }
+
+        if (pilihan == 1 || pilihan == 2) {
+            printf("Masukkan jumlah pinjaman: ");
+            scanf("%lf", &jumlah);
+
+            if (pilihan == 1 && (jumlah < 3000000 || jumlah > 128000000)) {
+                printf("Jumlah KPR tidak sesuai ketentuan!\n");
+                continue;
+            }
+
+            if (pilihan == 2 && (jumlah < 5000000 || jumlah > 500000000)) {
+                printf("Jumlah Multiguna tidak sesuai ketentuan!\n");
+                continue;
+            }
+        } else {
             printf("Pilihan tidak valid!\n");
-            continue;
-        }
-
-        printf("Masukkan jumlah pinjaman: ");
-        scanf("%lf", &jumlah);
-
-        if (pilihan == 1 && (jumlah < 3000000 || jumlah > 128000000)) {
-            printf("Jumlah KPR tidak sesuai ketentuan!\n");
-            continue;
-        }
-
-        if (pilihan == 2 && (jumlah < 5000000 || jumlah > 500000000)) {
-            printf("Jumlah Multiguna tidak sesuai ketentuan!\n");
             continue;
         }
 
@@ -356,8 +373,15 @@ int main() {
         scanf("%lf", &saldo_tabungan);
         fprintf(saldo, "Saldo: Rp. %.2lf\n", saldo_tabungan);
     }
+    fgets(line, sizeof(line), saldo);
+    sscanf(line, "Saldo: Rp. %lf", &saldo_tabungan);
     fclose(saldo);
 
+    printf("\nLogin berhasil\n");
+
+    printf("\nSaldo anda: %.2lf", saldo_tabungan);
+    printf("\nTekan enter...");
+    getchar(); 
     menu();
     return 0;
 }
