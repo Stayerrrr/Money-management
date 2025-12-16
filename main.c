@@ -20,6 +20,8 @@ FILE *salDeposit;
 const char *namaFile_deposit = "deposit.txt";
 FILE *history_pinjaman;
 const char *namaFile_pinjam = "history_pinjaman.txt";
+FILE *tagihan;
+const char *namaFile_tagihan = "tagihan.txt";
 
 // variabel line
 #define MAX_LINE_LENGTH 200
@@ -248,15 +250,21 @@ void peminjaman() {
 
             if (pilihan == 1 && (jumlah < 3000000 || jumlah > 128000000)) {
                 printf("Jumlah KPR tidak sesuai ketentuan!\n");
+                printf("Tekan Enter...");
+                getchar(); getchar();
                 continue;
             }
 
             if (pilihan == 2 && (jumlah < 5000000 || jumlah > 500000000)) {
                 printf("Jumlah Multiguna tidak sesuai ketentuan!\n");
+                printf("Tekan Enter...");
+                getchar(); getchar();
                 continue;
             }
         } else {
             printf("Pilihan tidak valid!\n");
+            printf("Tekan Enter...");
+            getchar(); getchar();
             continue;
         }
 
@@ -284,6 +292,12 @@ void bayar_tagihan() {
     double n;
 
     lihatSaldo();
+
+    tagihan = fopen(namaFile_tagihan, "w");
+    fclose(tagihan);
+
+    char typeTagihan[7][20] = {"PLN","Internet","Air","E-Wallet","Asuransi","Pajak","Pendidikan"};
+    
     while (1) {
         char system_operasi[10] = "nt";  // contoh nilai
         if (strcmp(system_operasi, "nt") == 0) {
