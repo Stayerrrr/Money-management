@@ -222,6 +222,8 @@ void peminjaman() {
         if (scanf("%d", &pilihan) != 1) {
             while (getchar() != '\n');
             printf("Input tidak valid!\n");
+            printf("\nTekan Enter...");
+            getchar(); 
             continue;
         }
 
