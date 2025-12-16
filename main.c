@@ -46,14 +46,6 @@ void updateSaldo(double saldoBaru) {
     remove(namaFile_saldo);
     rename("temp_saldo.txt", namaFile_saldo);
 }
-
-// ================= DEKLARASI =================
-void menu();
-void lihatTabungan();
-void transfer();
-void peminjaman();
-void bayar_tagihan();
-
 void lihatSaldo() {
     saldo = fopen(namaFile_saldo, "r");
     if (!saldo) return;
@@ -62,6 +54,14 @@ void lihatSaldo() {
     fclose(saldo);
 }
 
+// ================= DEKLARASI =================
+void menu();
+void lihatTabungan();
+void transfer();
+void peminjaman();
+void bayar_tagihan();
+
+// done
 // ================= LIHAT TABUNGAN & DEPOSIT =================
 void tabungan() {
     lihatSaldo();
@@ -125,7 +125,7 @@ void lihatTabungan() {
         else if (p == 2) deposit();
     } while (p != 3);
 }
-
+// done
 // ================= TRANSFER =================
 void transfer() {
     lihatSaldo();
@@ -198,90 +198,68 @@ void transfer() {
 void peminjaman() {
     int pilihan;
     double jumlah;
-
-    lihatSaldo();
-
-    char system_operasi[10] = "nt";  // contoh nilai
-        if (strcmp(system_operasi, "nt") == 0) {
-            system("cls");   // perintah clear di Windows
-        } else {
-            system("clear"); // perintah clear di Linux/Unix
-        }
-        
-        char p[][20] = {"KPR", "Multiguna"};
-
-        // printf("Pilih jenis kredit:\n");
-        // printf("1. %s\n", p[0]);
-        // printf("2. %s\n", p[1]);
-        // printf("Masukkan pilihan (1/2): ");
-        // scanf("%d", &pilihan);
-
-        // printf("Anda memilih: %s\n", p[pilihan - 1]);
-        lihatSaldo();
-        
-        history_pinjaman = fopen(namaFile_pinjam, "w");
-        
-        fclose(history_pinjaman);
-
-        while (1)
-        {
-        printf("=== MENU PINJAMAN ===");
-        printf("\n1. KPR (3jt - 128jt)\n2. Multiguna (5jt - 500jt)\n");
-        printf("3. Lihat Peminjaman\n4. Bayar Hutang\n5. Kembali\nPilih: ");
-        scanf("%d", &pilihan);
-
-        while (1)
-        {
-            if (pilihan == 1) {
-                printf("\nMasukkan jumlah pinjaman: ");
-                scanf("%lf", &jumlah);
-                if ((pilihan == 1 && (jumlah < 3000000 || jumlah > 128000000)))
-                {
-                    /* code */
-                    printf("Jumlah tidak sesuai ketentuan!\n");
-                } else
-                {
-                    /* code */
-                    saldo_tabungan += jumlah;
-                    updateSaldo(saldo_tabungan);
-                
-                    printf("Pinjaman disetujui!\n");
-                    printf("Saldo sekarang: Rp. %.2lf\n", saldo_tabungan);
-                    printf("Tekan enter...");
-                    getchar(); getchar();
-                    peminjaman();
-                    break;
-                }
-                
-            } else if (pilihan == 2) {
-                printf("\nMasukkan jumlah pinjaman: ");
-                scanf("%lf", &jumlah);
-                if ((pilihan == 2 && (jumlah < 5000000 || jumlah > 500000000)))
-                {
-                    /* code */
-                    printf("Jumlah tidak sesuai ketentuan!\n");
-                } else
-                {
-                    /* code */
-                    saldo_tabungan += jumlah;
-                    updateSaldo(saldo_tabungan);
-                
-                    printf("Pinjaman disetujui!\n");
-                    printf("Saldo sekarang: Rp. %.2lf\n", saldo_tabungan);
-                    printf("Tekan enter...");
-                    getchar(); getchar();
-                    peminjaman();
-                    break;
-                }
-            } else if (pilihan == 5)
-            {
-                return;
+    char p[2][20] = {"KPR", "Multiguna"};
+    
+    while (1) {
+        char system_operasi[10] = "nt";  // contoh nilai
+            if (strcmp(system_operasi, "nt") == 0) {
+                system("cls");   // perintah clear di Windows
             } else {
-                printf("\nPilihan tidak valid!\n");
+                system("clear"); // perintah clear di Linux/Unix
             }
+        lihatSaldo();
+
+        printf("\n=== MENU PINJAMAN ===\n");
+        printf("1. KPR (3jt - 128jt)\n");
+        printf("2. Multiguna (5jt - 500jt)\n");
+        printf("3. Kembali\n");
+        printf("Pilih: ");
+
+        if (scanf("%d", &pilihan) != 1) {
+            while (getchar() != '\n');
+            printf("Input tidak valid!\n");
+            continue;
         }
+
+        if (pilihan == 3) {
+            return;
+        }
+
+        if (pilihan != 1 && pilihan != 2) {
+            printf("Pilihan tidak valid!\n");
+            continue;
+        }
+
+        printf("Masukkan jumlah pinjaman: ");
+        scanf("%lf", &jumlah);
+
+        if (pilihan == 1 && (jumlah < 3000000 || jumlah > 128000000)) {
+            printf("Jumlah KPR tidak sesuai ketentuan!\n");
+            continue;
+        }
+
+        if (pilihan == 2 && (jumlah < 5000000 || jumlah > 500000000)) {
+            printf("Jumlah Multiguna tidak sesuai ketentuan!\n");
+            continue;
+        }
+
+        // Proses pinjaman
+        saldo_tabungan += jumlah;
+        updateSaldo(saldo_tabungan);
+
+        history_pinjaman = fopen(namaFile_pinjam, "a");
+        if (history_pinjaman != NULL) {
+            fprintf(history_pinjaman, "%s | %.2lf\n", p[pilihan - 1], jumlah);
+            fclose(history_pinjaman);
+        }
+
+        printf("\nPinjaman %s disetujui!\n", p[pilihan - 1]);
+        printf("Saldo sekarang: Rp. %.2lf\n", saldo_tabungan);
+        printf("Tekan Enter...");
+        getchar(); getchar();
     }
 }
+
 
 // ================= BAYAR TAGIHAN (SALDO BERKURANG) =================
 void bayar_tagihan() {
