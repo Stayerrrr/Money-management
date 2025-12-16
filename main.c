@@ -6,26 +6,33 @@
 char username[25];
 double inputPassword;
 
+// konstanta 
 #define MAX_NOREKENING 999999
 #define MIN_NOREKENING 100000
 #define MIN_TRANSFER 20000
 
+// variabel file
 FILE *saldo;
 const char *namaFile_saldo = "saldo.txt";
 FILE *history_transfer;
 const char *namaFile_history_transfer = "history_transfer.txt";
 FILE *salDeposit;
 const char *namaFile_deposit = "deposit.txt";
+FILE *history_pinjaman;
+const char *namaFile_pinjam = "history_pinjaman.txt";
 
+// variabel line
 #define MAX_LINE_LENGTH 200
 char line[MAX_LINE_LENGTH];
 
+// variabel untuk file saldo
 double saldo_tabungan;
 double depoSaldo;
 
+// variabel untuk file transfer
 double kirimTf;
 int noRekeningTf;
-char tanggalTf[11];
+char tanggalTf[11],historyTf[MAX_LINE_LENGTH];
 
 // ================= FUNGSI BANTU =================
 void updateSaldo(double saldoBaru) {
@@ -47,24 +54,24 @@ void transfer();
 void peminjaman();
 void bayar_tagihan();
 
-// ================= LIHAT TABUNGAN & DEPOSIT =================
-void tabungan() {
+void lihatSaldo() {
     saldo = fopen(namaFile_saldo, "r");
     if (!saldo) return;
     fgets(line, sizeof(line), saldo);
     sscanf(line, "Saldo: Rp. %lf", &saldo_tabungan);
     fclose(saldo);
+}
 
+// ================= LIHAT TABUNGAN & DEPOSIT =================
+void tabungan() {
+    lihatSaldo();
     printf("\nSaldo Anda: Rp. %.2lf\n", saldo_tabungan);
     printf("Tekan Enter...");
     getchar(); getchar();
 }
 
 void deposit() {
-    saldo = fopen(namaFile_saldo, "r");
-    fgets(line, sizeof(line), saldo);
-    sscanf(line, "Saldo: Rp. %lf", &saldo_tabungan);
-    fclose(saldo);
+    lihatSaldo();
 
     salDeposit = fopen(namaFile_deposit, "r");
     if (salDeposit) {
@@ -97,12 +104,21 @@ void deposit() {
     fprintf(t, "Saldo Deposit: Rp. %.2lf\n", depoSaldo);
     fclose(t);
 
-    printf("Deposit berhasil!\n");
+    printf("\nDeposit berhasil!\n");
+    printf("Tekan enter...");
+    getchar(); getchar();
 }
 
 void lihatTabungan() {
     int p;
     do {
+        char system_operasi[10] = "nt";  // contoh nilai
+        if (strcmp(system_operasi, "nt") == 0) {
+            system("cls");   // perintah clear di Windows
+        } else {
+            system("clear"); // perintah clear di Linux/Unix
+        }
+        printf("===== MENU TABUNGANS =====");
         printf("\n1. Tabungan\n2. Deposit\n3. Kembali\nPilih: ");
         scanf("%d", &p);
         if (p == 1) tabungan();
@@ -112,27 +128,45 @@ void lihatTabungan() {
 
 // ================= TRANSFER =================
 void transfer() {
-    saldo = fopen(namaFile_saldo, "r");
-    fgets(line, sizeof(line), saldo);
-    sscanf(line, "Saldo: Rp. %lf", &saldo_tabungan);
-    fclose(saldo);
+    lihatSaldo();
 
-    printf("Jumlah transfer (Minimal 20k): ");
-    scanf("%lf", &kirimTf);
-    if (kirimTf < MIN_TRANSFER || kirimTf > saldo_tabungan) {
-        printf("Jumlah tidak valid! (Minimal 20k)\n");
-        return;
+    char system_operasi[10] = "nt";  // contoh nilai
+        if (strcmp(system_operasi, "nt") == 0) {
+            system("cls");   // perintah clear di Windows
+        } else {
+            system("clear"); // perintah clear di Linux/Unix
+        }
+
+    printf("=== TRANSFER ===\n");
+    printf("Saldo anda: %.2lf\n", saldo_tabungan);
+    while (1)
+    {
+        printf("Jumlah transfer (Minimal 20k): ");
+        scanf("%lf", &kirimTf);
+        if (kirimTf < MIN_TRANSFER) {
+            printf("Jumlah tidak valid! (Minimal 20k)\n");
+        } else if (kirimTf > saldo_tabungan) {
+            printf("Saldo tidak cukup\n");
+        } else {
+            break;
+        }
     }
+    
 
     printf("Tanggal (DD/MM/YYYY): ");
     scanf("%10s", tanggalTf);
 
-    printf("No Rekening: ");
-    scanf("%d", &noRekeningTf);
-    if (noRekeningTf < MIN_NOREKENING || noRekeningTf > MAX_NOREKENING) {
-        printf("No rekening salah!\n");
-        return;
+    while (1)
+    {
+        printf("No Rekening: ");
+        scanf("%d", &noRekeningTf);
+        if (noRekeningTf < MIN_NOREKENING || noRekeningTf > MAX_NOREKENING) {
+            printf("No rekening salah!\n");
+        } else {
+            break;
+        }
     }
+    
 
     history_transfer = fopen(namaFile_history_transfer, "a");
     fprintf(history_transfer, "%s | %.2lf | %d\n",
@@ -142,7 +176,22 @@ void transfer() {
     saldo_tabungan -= kirimTf;
     updateSaldo(saldo_tabungan);
 
-    printf("Transfer berhasil!\n");
+    printf("\nTransfer berhasil!\n");
+    printf("-----------------------\n");
+
+    lihatSaldo();
+    printf("Sisa Saldo anda: %.2lf", saldo_tabungan);
+
+    printf("\nHistory Transfer\n");
+    history_pinjaman = fopen(namaFile_history_transfer, "r");
+    if (history_pinjaman != NULL) {
+        while (fgets(line, sizeof(line), history_pinjaman)) {
+            printf("%s", line);
+        }
+        fclose(history_pinjaman);
+    }
+    printf("\nTekan enter...");
+    getchar(); getchar();
 }
 
 // ================= PEMINJAMAN (SALDO BERTAMBAH) =================
@@ -150,29 +199,87 @@ void peminjaman() {
     int pilihan;
     double jumlah;
 
-    saldo = fopen(namaFile_saldo, "r");
-    fgets(line, sizeof(line), saldo);
-    sscanf(line, "Saldo: Rp. %lf", &saldo_tabungan);
-    fclose(saldo);
+    lihatSaldo();
 
-    printf("\n1. KPR (3jt - 128jt)\n2. Multiguna (5jt - 500jt)\n3. Kembali\nPilih: ");
-    scanf("%d", &pilihan);
-
-    if (pilihan == 1 || pilihan == 2) {
-        printf("Masukkan jumlah pinjaman: ");
-        scanf("%lf", &jumlah);
-
-        if ((pilihan == 1 && (jumlah < 3000000 || jumlah > 128000000)) ||
-            (pilihan == 2 && (jumlah < 5000000 || jumlah > 500000000))) {
-            printf("Jumlah tidak sesuai ketentuan!\n");
-            return;
+    char system_operasi[10] = "nt";  // contoh nilai
+        if (strcmp(system_operasi, "nt") == 0) {
+            system("cls");   // perintah clear di Windows
+        } else {
+            system("clear"); // perintah clear di Linux/Unix
         }
+        
+        char p[][20] = {"KPR", "Multiguna"};
 
-        saldo_tabungan += jumlah;
-        updateSaldo(saldo_tabungan);
+        // printf("Pilih jenis kredit:\n");
+        // printf("1. %s\n", p[0]);
+        // printf("2. %s\n", p[1]);
+        // printf("Masukkan pilihan (1/2): ");
+        // scanf("%d", &pilihan);
 
-        printf("Pinjaman disetujui!\n");
-        printf("Saldo sekarang: Rp. %.2lf\n", saldo_tabungan);
+        // printf("Anda memilih: %s\n", p[pilihan - 1]);
+        lihatSaldo();
+        
+        history_pinjaman = fopen(namaFile_pinjam, "w");
+        
+        fclose(history_pinjaman);
+
+        while (1)
+        {
+        printf("=== MENU PINJAMAN ===");
+        printf("\n1. KPR (3jt - 128jt)\n2. Multiguna (5jt - 500jt)\n");
+        printf("3. Lihat Peminjaman\n4. Bayar Hutang\n5. Kembali\nPilih: ");
+        scanf("%d", &pilihan);
+
+        while (1)
+        {
+            if (pilihan == 1) {
+                printf("\nMasukkan jumlah pinjaman: ");
+                scanf("%lf", &jumlah);
+                if ((pilihan == 1 && (jumlah < 3000000 || jumlah > 128000000)))
+                {
+                    /* code */
+                    printf("Jumlah tidak sesuai ketentuan!\n");
+                } else
+                {
+                    /* code */
+                    saldo_tabungan += jumlah;
+                    updateSaldo(saldo_tabungan);
+                
+                    printf("Pinjaman disetujui!\n");
+                    printf("Saldo sekarang: Rp. %.2lf\n", saldo_tabungan);
+                    printf("Tekan enter...");
+                    getchar(); getchar();
+                    peminjaman();
+                    break;
+                }
+                
+            } else if (pilihan == 2) {
+                printf("\nMasukkan jumlah pinjaman: ");
+                scanf("%lf", &jumlah);
+                if ((pilihan == 2 && (jumlah < 5000000 || jumlah > 500000000)))
+                {
+                    /* code */
+                    printf("Jumlah tidak sesuai ketentuan!\n");
+                } else
+                {
+                    /* code */
+                    saldo_tabungan += jumlah;
+                    updateSaldo(saldo_tabungan);
+                
+                    printf("Pinjaman disetujui!\n");
+                    printf("Saldo sekarang: Rp. %.2lf\n", saldo_tabungan);
+                    printf("Tekan enter...");
+                    getchar(); getchar();
+                    peminjaman();
+                    break;
+                }
+            } else if (pilihan == 5)
+            {
+                return;
+            } else {
+                printf("\nPilihan tidak valid!\n");
+            }
+        }
     }
 }
 
@@ -181,12 +288,15 @@ void bayar_tagihan() {
     int p;
     double n;
 
-    saldo = fopen(namaFile_saldo, "r");
-    fgets(line, sizeof(line), saldo);
-    sscanf(line, "Saldo: Rp. %lf", &saldo_tabungan);
-    fclose(saldo);
-
+    lihatSaldo();
     while (1) {
+        char system_operasi[10] = "nt";  // contoh nilai
+        if (strcmp(system_operasi, "nt") == 0) {
+            system("cls");   // perintah clear di Windows
+        } else {
+            system("clear"); // perintah clear di Linux/Unix
+        }
+        printf("=== Menu Tagihan ===");
         printf("\n1. PLN\n2. Internet\n3. Air\n4. E-Wallet\n");
         printf("5. Asuransi\n6. Pajak\n7. Pendidikan\n8. Kembali\nPilih: ");
         scanf("%d", &p);
@@ -212,6 +322,14 @@ void bayar_tagihan() {
 void menu() {
     int p;
     do {
+        char system_operasi[10] = "nt";  // contoh nilai
+        if (strcmp(system_operasi, "nt") == 0) {
+            system("cls");   // perintah clear di Windows
+        } else {
+            system("clear"); // perintah clear di Linux/Unix
+        }
+
+        printf("===== MENU UTANA =====");
         printf("\n1. Lihat Tabungan\n2. Transfer\n3. Peminjaman\n4. Bayar Tagihan\n5. Keluar\nPilih: ");
         scanf("%d", &p);
 
@@ -219,6 +337,8 @@ void menu() {
         else if (p == 2) transfer();
         else if (p == 3) peminjaman();
         else if (p == 4) bayar_tagihan();
+        else if (p == 5) printf("\nProgram selesai. Terima kasih!\n");
+        else printf("\n Pilihan tidak valid!\n");
 
     } while (p != 5);
 }
@@ -227,6 +347,13 @@ void menu() {
 int main() {
     char correctUsername[] = "Tioganteng123";
     double correctPassword = 606060;
+
+    char system_operasi[10] = "nt";  // contoh nilai
+        if (strcmp(system_operasi, "nt") == 0) {
+            system("cls");   // perintah clear di Windows
+        } else {
+            system("clear"); // perintah clear di Linux/Unix
+        }
 
     printf("Selamat Datang di Aplikasi Akubisa-mobile\n");
 
