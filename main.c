@@ -215,8 +215,7 @@ void peminjaman() {
         printf("1. KPR (3jt - 128jt)\n");
         printf("2. Multiguna (5jt - 500jt)\n");
         printf("3. Bayar Pinjaman\n");
-        printf("4. Lihat History\n");
-        printf("5. Kembali\n");
+        printf("4. Kembali\n");
         printf("Pilih: ");
 
         if (scanf("%d", &pilihan) != 1) {
@@ -227,20 +226,34 @@ void peminjaman() {
             continue;
         }
 
-        if (pilihan == 5) {
+        if (pilihan == 4) {
             return;
         }
-
-        if (pilihan == 4) {
+        
+        int no = 1;
+        int noBayar;
+        if (pilihan == 3) {
             history_pinjaman = fopen(namaFile_pinjam, "r");
             if (history_pinjaman == NULL) {
                 printf("\nBelum ada history pinjaman.\n");
             } else {
-                printf("\n=== HISTORY PINJAMAN ===\n");
+                printf("\n=== PINJAMAN ===\n");
                 while (fgets(line, sizeof(line), history_pinjaman)) {
                     printf("%s", line);
                 }
                 fclose(history_pinjaman);
+
+                while (1)
+                {
+                    printf("\nMasukkan no yang ingin dibayar: ");
+                    scanf("%d", &noBayar);
+                    if (noBayar < 0 || noBayar > no) {
+                        printf("\nPilihan tidak valid!\n");
+                    } else {
+                        break;
+                    }
+                }
+                history_pinjaman = fopen(namaFile_pinjam, "r");
             }
             printf("\nTekan Enter...");
             getchar(); getchar();
@@ -275,9 +288,20 @@ void peminjaman() {
         saldo_tabungan += jumlah;
         updateSaldo(saldo_tabungan);
 
+        // 1. Hitung jumlah baris
+        history_pinjaman = fopen(namaFile_pinjam, "r");
+        if (history_pinjaman != NULL) {
+            while (fgets(line, sizeof(line), history_pinjaman)) {
+                no++;
+            }
+            fclose(history_pinjaman);
+        }
+
+        // 2. Tambah data
         history_pinjaman = fopen(namaFile_pinjam, "a");
         if (history_pinjaman != NULL) {
-            fprintf(history_pinjaman, "%s | %.2lf\n", p[pilihan - 1], jumlah);
+            fprintf(history_pinjaman, "%d | %s | %.2lf\n",
+                    no, p[pilihan - 1], jumlah);
             fclose(history_pinjaman);
         }
 
@@ -287,7 +311,6 @@ void peminjaman() {
         getchar(); getchar();
     }
 }
-
 
 // ================= BAYAR TAGIHAN (SALDO BERKURANG) =================
 void bayar_tagihan() {
