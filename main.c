@@ -36,6 +36,9 @@ double kirimTf;
 int noRekeningTf;
 char tanggalTf[11],historyTf[MAX_LINE_LENGTH];
 
+// variabel untuk file pinjaman
+char tanggalPinjam[11];
+
 // ================= FUNGSI BANTU =================
 void updateSaldo(double saldoBaru) {
     FILE *temp = fopen("temp_saldo.txt", "w");
@@ -195,25 +198,25 @@ void transfer() {
     printf("\nTekan enter...");
     getchar(); getchar();
 }
-
+// done
 // ================= PEMINJAMAN (SALDO BERTAMBAH) =================
 void peminjaman() {
     int pilihan;
     double jumlah;
     char p[2][20] = {"KPR", "Multiguna"};
-    
+
     while (1) {
         char system_operasi[10] = "nt";  // contoh nilai
-            if (strcmp(system_operasi, "nt") == 0) {
-                system("cls");   // perintah clear di Windows
-            } else {
-                system("clear"); // perintah clear di Linux/Unix
-            }
+        if (strcmp(system_operasi, "nt") == 0) {
+            system("cls");   // perintah clear di Windows
+        } else {
+            system("clear"); // perintah clear di Linux/Unix
+        }
         lihatSaldo();
 
         printf("\n=== MENU PINJAMAN ===\n");
-        printf("1. KPR (3jt - 128jt)\n");
-        printf("2. Multiguna (5jt - 500jt)\n");
+        printf("1. Ajukan KPR (3jt - 128jt)\n");
+        printf("2. Ajukan Multiguna (5jt - 50jt)\n");
         printf("3. Bayar Pinjaman\n");
         printf("4. Kembali\n");
         printf("Pilih: ");
@@ -221,94 +224,153 @@ void peminjaman() {
         if (scanf("%d", &pilihan) != 1) {
             while (getchar() != '\n');
             printf("Input tidak valid!\n");
-            printf("\nTekan Enter...");
-            getchar(); 
+            getchar();
             continue;
         }
+        while (getchar() != '\n');
 
-        if (pilihan == 4) {
-            return;
-        }
-        
-        int no = 1;
-        int noBayar;
+        // ================= KEMBALI =================
+        if (pilihan == 4) return;
+
+        // ================= BAYAR PINJAMAN =================
         if (pilihan == 3) {
             history_pinjaman = fopen(namaFile_pinjam, "r");
-            if (history_pinjaman == NULL) {
-                printf("\nBelum ada history pinjaman.\n");
-            } else {
-                printf("\n=== PINJAMAN ===\n");
-                while (fgets(line, sizeof(line), history_pinjaman)) {
-                    printf("%s", line);
-                }
-                fclose(history_pinjaman);
-
-                while (1)
-                {
-                    printf("\nMasukkan no yang ingin dibayar: ");
-                    scanf("%d", &noBayar);
-                    if (noBayar < 0 || noBayar > no) {
-                        printf("\nPilihan tidak valid!\n");
-                    } else {
-                        break;
-                    }
-                }
-                history_pinjaman = fopen(namaFile_pinjam, "r");
+            if (!history_pinjaman) {
+                printf("Belum ada pinjaman.\n");
+                getchar();
+                continue;
             }
+
+            int no = 1;
+            printf("=== Pinjaman ===\n");
+            while (fgets(line, sizeof(line), history_pinjaman)) {
+                printf("%d | %s", no++, line);
+            }
+            fclose(history_pinjaman);
+
+            if (no == 1) {
+                printf("Belum ada pinjaman.\n");
+                getchar();
+                continue;
+            }
+
+            int noHapus;
+            printf("\nPilih mana yang mau dibayar: ");
+            if (scanf("%d", &noHapus) != 1) {
+                while (getchar() != '\n');
+                printf("Input tidak valid!\n");
+                continue;
+            }
+            while (getchar() != '\n');
+
+            history_pinjaman = fopen(namaFile_pinjam, "r");
+            FILE *temp = fopen("temp.txt", "w");
+
+            if (!history_pinjaman || !temp) {
+                printf("Gagal membuka file!\n");
+                if (history_pinjaman) fclose(history_pinjaman);
+                if (temp) fclose(temp);
+                getchar();
+                continue;
+            }
+
+            int idx = 1;
+            char tanggal[11], jenis[20];
+            double jumlahPinjaman = 0;
+            int ditemukan = 0;
+
+            while (fgets(line, sizeof(line), history_pinjaman)) {
+                if (idx == noHapus) {
+                    // Simpan data pinjaman yang dibayar
+                    sscanf(line, "%10[^|] | %19[^|] | %lf",
+                        tanggal, jenis, &jumlahPinjaman);
+                    ditemukan = 1;
+                } else {
+                    // Salin pinjaman lain
+                    fputs(line, temp);
+                }
+                idx++;
+            }
+
+            fclose(history_pinjaman);
+            fclose(temp);
+
+            if (ditemukan == 0) {
+                printf("Nomor pinjaman tidak ditemukan!\n");
+                remove("temp.txt");
+                getchar();
+                continue;
+            }
+
+            // Cek saldo
+            if (jumlahPinjaman > saldo_tabungan) {
+                printf("Saldo tidak cukup untuk membayar pinjaman!\n");
+                remove("temp.txt");
+                getchar();
+                continue;
+            }
+
+            // Update saldo
+            saldo_tabungan -= jumlahPinjaman;
+            updateSaldo(saldo_tabungan);
+
+            // Replace file
+            remove(namaFile_pinjam);
+            rename("temp.txt", namaFile_pinjam);
+
+            printf("\nPinjaman berhasil dibayar!\n");
+            printf("Jumlah dibayar: Rp. %.2lf\n", jumlahPinjaman);
+            printf("Saldo sekarang: Rp. %.2lf\n", saldo_tabungan);
+
             printf("\nTekan Enter...");
-            getchar(); getchar();
+            getchar();
             continue;
         }
 
-        if (pilihan == 1 || pilihan == 2) {
-            printf("Masukkan jumlah pinjaman: ");
-            scanf("%lf", &jumlah);
-
-            if (pilihan == 1 && (jumlah < 3000000 || jumlah > 128000000)) {
-                printf("Jumlah KPR tidak sesuai ketentuan!\n");
-                printf("Tekan Enter...");
-                getchar(); getchar();
-                continue;
-            }
-
-            if (pilihan == 2 && (jumlah < 5000000 || jumlah > 500000000)) {
-                printf("Jumlah Multiguna tidak sesuai ketentuan!\n");
-                printf("Tekan Enter...");
-                getchar(); getchar();
-                continue;
-            }
-        } else {
+        // ================= AJUKAN PINJAMAN =================
+        if (pilihan != 1 && pilihan != 2) {
             printf("Pilihan tidak valid!\n");
-            printf("Tekan Enter...");
-            getchar(); getchar();
+            getchar();
             continue;
         }
 
-        // Proses pinjaman
+        printf("Masukkan jumlah pinjaman: ");
+        if (scanf("%lf", &jumlah) != 1) {
+            while (getchar() != '\n');
+            printf("Input salah!\n");
+            getchar();
+            continue;
+        }
+        while (getchar() != '\n');
+
+        if (pilihan == 1 && (jumlah < 3000000 || jumlah > 128000000)) {
+            printf("Jumlah KPR tidak sesuai!\n");
+            getchar();
+            continue;
+        }
+
+        if (pilihan == 2 && (jumlah < 5000000 || jumlah > 500000000)) {
+            printf("Jumlah Multiguna tidak sesuai!\n");
+            getchar();
+            continue;
+        }
+
+        printf("Tanggal (DD/MM/YYYY): ");
+        scanf("%10s", tanggalPinjam);
+        while (getchar() != '\n');
+
         saldo_tabungan += jumlah;
         updateSaldo(saldo_tabungan);
 
-        // 1. Hitung jumlah baris
-        history_pinjaman = fopen(namaFile_pinjam, "r");
-        if (history_pinjaman != NULL) {
-            while (fgets(line, sizeof(line), history_pinjaman)) {
-                no++;
-            }
-            fclose(history_pinjaman);
-        }
-
-        // 2. Tambah data
         history_pinjaman = fopen(namaFile_pinjam, "a");
-        if (history_pinjaman != NULL) {
-            fprintf(history_pinjaman, "%d | %s | %.2lf\n",
-                    no, p[pilihan - 1], jumlah);
-            fclose(history_pinjaman);
-        }
+        fprintf(history_pinjaman, "%s | %s | %.2lf\n",
+                tanggalPinjam, p[pilihan - 1], jumlah);
+        fclose(history_pinjaman);
 
-        printf("\nPinjaman %s disetujui!\n", p[pilihan - 1]);
-        printf("Saldo sekarang: Rp. %.2lf\n", saldo_tabungan);
+        printf("\nPinjaman disetujui!\n");
+        printf("Saldo sekarang: %.2lf\n", saldo_tabungan);
         printf("Tekan Enter...");
-        getchar(); getchar();
+        getchar();
     }
 }
 
