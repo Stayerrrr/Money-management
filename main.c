@@ -381,9 +381,6 @@ void bayar_tagihan() {
 
     lihatSaldo();
 
-    tagihan = fopen(namaFile_tagihan, "w");
-    fclose(tagihan);
-
     char typeTagihan[7][20] = {"PLN","Internet","Air","E-Wallet","Asuransi","Pajak","Pendidikan"};
     
     while (1) {
@@ -398,20 +395,44 @@ void bayar_tagihan() {
         printf("5. Asuransi\n6. Pajak\n7. Pendidikan\n8. Kembali\nPilih: ");
         scanf("%d", &p);
         if (p == 8) break;
-
+        
         printf("Nominal: ");
         scanf("%lf", &n);
-
+        
         if (n <= 0 || n > saldo_tabungan) {
             printf("Saldo tidak cukup!\n");
             continue;
         }
+
+        tagihan = fopen(namaFile_tagihan, "a");
+        if (tagihan == NULL) {
+            printf("Gagal membuka file tagihan!\n");
+            return;
+        }
+
+        fprintf(tagihan, "%s | %.2lf\n", typeTagihan[p - 1], n);
+        fclose(tagihan);
+
+        printf("\n=== History Pembayaran Tagihan ===\n");
+
+        tagihan = fopen(namaFile_tagihan, "r");
+        if (tagihan == NULL) {
+            printf("Belum ada history tagihan.\n");
+            return;
+        }
+
+        while (fgets(line, sizeof(line), tagihan)) {
+            printf("%s", line);
+        }
+        fclose(tagihan);
 
         saldo_tabungan -= n;
         updateSaldo(saldo_tabungan);
 
         printf("Pembayaran berhasil!\n");
         printf("Sisa saldo: Rp. %.2lf\n", saldo_tabungan);
+        printf("Tekan Enter...");
+        getchar(); getchar();
     }
 }
 
