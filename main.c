@@ -148,8 +148,7 @@ void transfer() {
     printf("Saldo anda: %.2lf\n", saldo_tabungan);
     while (1)
     {
-         printf("Masukkan jumlah transfer (Minimal 20000)\n");
-        printf("Ketik 'y' untuk kembali ke menu\n");
+        printf("Masukkan jumlah transfer (Minimal 20000) Atau tekan y untuk kembali ke menu\n");
         printf("> ");
 
         scanf("%s", input);
