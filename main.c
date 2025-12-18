@@ -341,26 +341,30 @@ void peminjaman() {
             continue;
         }
 
-        printf("Masukkan jumlah pinjaman: ");
-        if (scanf("%lf", &jumlah) != 1) {
+        while (1)
+        {
+            printf("Masukkan jumlah pinjaman: ");
+            if (scanf("%lf", &jumlah) != 1) {
+                while (getchar() != '\n');
+                printf("Input salah!\n");
+                getchar();
+                continue;
+            }
             while (getchar() != '\n');
-            printf("Input salah!\n");
-            getchar();
-            continue;
+    
+            if (pilihan == 1 && (jumlah < 3000000 || jumlah > 128000000)) {
+                printf("Jumlah KPR tidak sesuai!\n");
+                getchar();
+                continue;
+            } else if (pilihan == 2 && (jumlah < 5000000 || jumlah > 500000000)) {
+                printf("Jumlah Multiguna tidak sesuai!\n");
+                getchar();
+                continue;
+            } else {
+                break;
+            }
         }
-        while (getchar() != '\n');
-
-        if (pilihan == 1 && (jumlah < 3000000 || jumlah > 128000000)) {
-            printf("Jumlah KPR tidak sesuai!\n");
-            getchar();
-            continue;
-        }
-
-        if (pilihan == 2 && (jumlah < 5000000 || jumlah > 500000000)) {
-            printf("Jumlah Multiguna tidak sesuai!\n");
-            getchar();
-            continue;
-        }
+        
 
         printf("Tanggal (DD/MM/YYYY): ");
         scanf("%10s", tanggalPinjam);
