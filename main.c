@@ -262,13 +262,17 @@ void peminjaman() {
             }
 
             int noHapus;
-            printf("\nPilih mana yang mau dibayar: ");
-            if (scanf("%d", &noHapus) != 1) {
+            while (1)
+            {
+                printf("\nPilih mana yang mau dibayar: ");
+                if (scanf("%d", &noHapus) != 1) {
+                    while (getchar() != '\n');
+                    printf("Input tidak valid!\n");
+                    continue;
+                }
                 while (getchar() != '\n');
-                printf("Input tidak valid!\n");
-                continue;
+                break;
             }
-            while (getchar() != '\n');
 
             history_pinjaman = fopen(namaFile_pinjam, "r");
             FILE *temp = fopen("temp.txt", "w");
