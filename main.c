@@ -65,6 +65,7 @@ void lihatTabungan();
 void transfer();
 void peminjaman();
 void bayar_tagihan();
+void hapusTransfer();
 
 // done
 // ================= LIHAT TABUNGAN & DEPOSIT =================
@@ -133,6 +134,7 @@ void lihatTabungan() {
 // done
 // ================= TRANSFER =================
 void transfer() {
+    char input[20];
     lihatSaldo();
 
     char system_operasi[10] = "nt";  // contoh nilai
@@ -146,24 +148,16 @@ void transfer() {
     printf("Saldo anda: %.2lf\n", saldo_tabungan);
     while (1)
     {
-        printf("Jumlah transfer (Minimal 20k): ");
-        scanf("%lf", &kirimTf);
-        if (kirimTf < MIN_TRANSFER) {
-            printf("Jumlah tidak valid! (Minimal 20k)\n");
-        } else if (kirimTf > saldo_tabungan) {
-            printf("Saldo tidak cukup\n");
-        } else {
-            break;
+         printf("Masukkan jumlah transfer (Minimal 20000)\n");
+        printf("Ketik 'y' untuk kembali ke menu\n");
+        printf("> ");
+
+        scanf("%s", input);
+
+        // Back to menu
+        if (input[0] == 'y' || input[0] == 'Y') {
+            return; // keluar dari fungsi transfer
         }
-    }
-    
-
-    printf("Tanggal (DD/MM/YYYY): ");
-    scanf("%10s", tanggalTf);
-
-    while (1)
-    {
-        printf("No Rekening: ");
         scanf("%d", &noRekeningTf);
         if (noRekeningTf < MIN_NOREKENING || noRekeningTf > MAX_NOREKENING) {
             printf("No rekening salah!\n");
