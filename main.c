@@ -135,6 +135,7 @@ void lihatTabungan() {
 // ================= TRANSFER =================
 void transfer() {
     char input[20];
+
     lihatSaldo();
 
     char system_operasi[10] = "nt";  // contoh nilai
@@ -156,19 +157,29 @@ void transfer() {
         // Back to menu
         if (input[0] == 'y' || input[0] == 'Y') {
             return; // keluar dari fungsi transfer
-        } else if (kirimTf < 20000) {
-            printf("Saldo transfer minimal 20k");
-        }
+        } 
+        int temp = atoi(input);
+        
+        if (temp < 20000) {
+            printf("Saldo transfer minimal 20k \n");
+            continue;
+        } 
+          kirimTf = temp;
 
+        printf("Masukkan nomer rekening: ");
         scanf("%d", &noRekeningTf);
         if (noRekeningTf < MIN_NOREKENING || noRekeningTf > MAX_NOREKENING) {
             printf("No rekening salah!\n");
-        } else {
-            break;
+            continue;
         }
+        printf("Tanggal transfer (DD/MM/YEAR): ");
+        scanf("%s", tanggalTf);
+        
+        break;
+
     }
     
-
+    
     history_transfer = fopen(namaFile_history_transfer, "a");
     fprintf(history_transfer, "%s | %.2lf | %d\n",
             tanggalTf, kirimTf, noRekeningTf);
