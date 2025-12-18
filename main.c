@@ -156,7 +156,10 @@ void transfer() {
         // Back to menu
         if (input[0] == 'y' || input[0] == 'Y') {
             return; // keluar dari fungsi transfer
+        } else if (kirimTf < 20000) {
+            printf("Saldo transfer minimal 20k");
         }
+
         scanf("%d", &noRekeningTf);
         if (noRekeningTf < MIN_NOREKENING || noRekeningTf > MAX_NOREKENING) {
             printf("No rekening salah!\n");
