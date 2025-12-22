@@ -477,7 +477,7 @@ void menu() {
         else if (p == 3) peminjaman();
         else if (p == 4) bayar_tagihan();
         else if (p == 5) printf("\nProgram selesai. Terima kasih!\n");
-        else printf("\n Pilihan tidak valid!\n");
+        else printf("\n Pilihan tidak valid!\n"); getchar(); getchar();
 
     } while (p != 5);
 }
