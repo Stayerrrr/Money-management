@@ -388,7 +388,7 @@ void peminjaman() {
         getchar();
     }
 }
-// 
+// done 
 // ================= BAYAR TAGIHAN (SALDO BERKURANG) =================
 void bayar_tagihan() {
     int p;
