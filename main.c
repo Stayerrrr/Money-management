@@ -388,7 +388,7 @@ void peminjaman() {
         getchar();
     }
 }
-// done
+// 
 // ================= BAYAR TAGIHAN (SALDO BERKURANG) =================
 void bayar_tagihan() {
     int p;
@@ -409,6 +409,12 @@ void bayar_tagihan() {
         printf("\n1. PLN\n2. Internet\n3. Air\n4. E-Wallet\n");
         printf("5. Asuransi\n6. Pajak\n7. Pendidikan\n8. Kembali\nPilih: ");
         scanf("%d", &p);
+        if (p < 1 || p > 8) {
+            printf("\nPilihan tidak valid!\n");
+            getchar(); getchar();
+            continue;
+        }
+
         if (p == 8) break;
         
         printf("Nominal: ");
